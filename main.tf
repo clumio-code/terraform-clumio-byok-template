@@ -1,6 +1,46 @@
-data aws_caller_identity current {}
+data aws_caller_identity current {
+  provider = aws
+}
 
-data aws_region current {}
+data aws_region current {
+  provider = aws
+}
+
+data "aws_iam_policy_document" "byok_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:*"
+    ]
+    principals {
+      type = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:GenerateDataKey*",
+      "kms:Decrypt",
+      "kms:Encrypt",
+      "kms:ReEncrypt*",
+      "kms:DescribeKey",
+      "kms:CreateGrant",
+      "kms:RetireGrant",
+      "kms:ListGrants",
+      "kms:ListRetirableGrants"
+    ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${var.clumio_control_plane_account_id}:root",
+        "arn:aws:iam::${var.clumio_account_id}:root"
+      ]
+    }
+    resources = ["*"]
+  }
+}
 
 resource "aws_kms_key" "multi_region_cmk_key" {
   multi_region             = true
@@ -8,101 +48,115 @@ resource "aws_kms_key" "multi_region_cmk_key" {
   key_usage                = "ENCRYPT_DECRYPT"
   is_enabled               = true
   enable_key_rotation      = true
-  deletion_window_in_days  = 30
-  policy                   = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-            },
-            "Action": "kms:*",
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::${var.clumio_control_plane_account_id}:root",
-                    "arn:aws:iam::${var.clumio_account_id}:root"
-                ]
-            },
-            "Action": [
-                "kms:GenerateDataKey",
-                "kms:GenerateDataKeyWithoutPlaintext",
-                "kms:Decrypt",
-                "kms:Encrypt",
-                "kms:ReEncrypt",
-                "kms:DescribeKey"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-EOF
+  deletion_window_in_days  = var.deletion_window_in_days
+  policy                   = data.aws_iam_policy_document.byok_policy_document.json
 }
 
-resource "aws_cloudformation_stack_set" "replica_keys" {
-  count = var.other_regions != "" ? 1 : 0
-  name = "ClumioKMS-Replica"
-  description = "Replicate multi-region CMK in your AWS account for CLumio to use to encrypt backups in other regions"
-  permission_model = var.user_self_managed_permission_model ? "SELF_MANAGED" : "SERVICE_MANAGED"
-  administration_role_arn = var.administration_role_arn
-  template_body = <<TEMPLATE
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Replicate multi-region CMK in your AWS account for Clumio to use to encrypt backups in other regions'
-Resources:
- ReplicaKey:
-   Type: AWS::KMS::ReplicaKey
-   Properties:
-     Description: 'The CMK for Clumio to use to encrypt backups'
-     Enabled: True
-     KeyPolicy:
-       Version: '2012-10-17'
-       Statement:
-         - Effect: 'Allow'
-           Principal:
-             AWS: 'arn:aws:iam::${data.aws_caller_identity.current.account_id}:root'
-           Action:
-             - 'kms:*'
-           Resource: '*'
-         - Effect: 'Allow'
-           Principal:
-             AWS:
-               - 'arn:aws:iam::${var.clumio_control_plane_account_id}:root'
-               - 'arn:aws:iam::${var.clumio_account_id}:root'
-           Action:
-             - 'kms:GenerateDataKey'
-             - 'kms:GenerateDataKeyWithoutPlaintext'
-             - 'kms:Decrypt'
-             - 'kms:Encrypt'
-             - 'kms:ReEncrypt'
-             - 'kms:DescribeKey'
-           Resource: '*'
-     PendingWindowInDays: 30
-     PrimaryKeyArn: '${aws_kms_key.multi_region_cmk_key.arn}'
-     Tags:
-       - Key: 'Vendor'
-         Value: 'Clumio'
-       - Key: 'Name'
-         Value: '${var.token}'
-TEMPLATE
+resource "aws_kms_replica_key" "replica_uw1" {
+  provider = aws.uw1
+  count = contains(var.other_regions, "us-west-1") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
 }
 
-resource "aws_cloudformation_stack_set_instance" "replicas" {
-  for_each = toset(var.other_regions)
-  account_id     = data.aws_caller_identity.current.account_id
-  region         = each.key
-  stack_set_name = aws_cloudformation_stack_set.replica_keys[0].name
+resource "aws_kms_replica_key" "replica_uw2" {
+  provider = aws.uw2
+  count = contains(var.other_regions, "us-west-2") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+}
+
+resource "aws_kms_replica_key" "replica_ue1" {
+  provider = aws.ue1
+  count = contains(var.other_regions, "us-east-1") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+}
+
+resource "aws_kms_replica_key" "replica_ue2" {
+  provider = aws.ue2
+  count = contains(var.other_regions, "us-east-2") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+}
+
+resource "aws_kms_replica_key" "replica_cc1" {
+  provider = aws.cc1
+  count = contains(var.other_regions, "ca-central-1") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+}
+
+resource "aws_kms_replica_key" "replica_ec1" {
+  provider = aws.ec1
+  count = contains(var.other_regions, "eu-central-1") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+}
+
+resource "aws_kms_replica_key" "replica_ew1" {
+  provider = aws.ew1
+  count = contains(var.other_regions, "eu-west-1") ? 1 : 0
+  description             = "The CMK for Clumio to use to encrypt backups"
+  deletion_window_in_days = var.deletion_window_in_days
+  primary_key_arn         = aws_kms_key.multi_region_cmk_key.arn
+  tags = {
+    "Vendor" = "Clumio",
+    "Name" = var.token
+  }
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
 }
 
 resource "clumio_post_process_kms" "clumio_phone_home" {
+  depends_on = [
+    aws_kms_key.multi_region_cmk_key,
+    aws_kms_replica_key.replica_uw1,
+    aws_kms_replica_key.replica_uw2,
+    aws_kms_replica_key.replica_ue1,
+    aws_kms_replica_key.replica_ue2,
+    aws_kms_replica_key.replica_cc1,
+    aws_kms_replica_key.replica_ec1,
+    aws_kms_replica_key.replica_ew1
+  ]
   token = var.token
   account_id = var.account_native_id
   region = data.aws_region.current.name
   multi_region_cmk_key_id = aws_kms_key.multi_region_cmk_key.id
-  stack_set_id = aws_cloudformation_stack_set.replica_keys[0].id
   other_regions = length(var.other_regions) > 0 ? join(", ", var.other_regions) : ""
 }

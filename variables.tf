@@ -3,12 +3,6 @@ variable "other_regions" {
   type = list(string)
 }
 
-variable "user_self_managed_permission_model" {
-  description = "User self-managed permission model."
-  type = bool
-  default = false
-}
-
 variable "account_native_id" {
   description = "Wallet account native ID."
   type = string
@@ -29,8 +23,8 @@ variable "token" {
   type = string
 }
 
-variable "administration_role_arn" {
-  description = "The AWS administration role arn. If user_self_managed_permission_model is true then this value needs to be populated" 
-  type = string
-  default = ""
+variable "deletion_window_in_days" {
+  description = "Primary and replica key deletion window in days."
+  type = number
+  default = 30
 }
