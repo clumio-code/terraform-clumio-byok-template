@@ -25,8 +25,12 @@ content: |-
   Below is an example of using the module:
 
   ```hcl
+  {{ include "examples/all_data_sources/provider.tf" }}
+
   {{ include "examples/all_data_sources/main.tf" }}
   ```
+  In the above example, since the regions in which the replica keys will be installed is based on the regions returned by the clumio_wallet resource, it has to be created first: `terraform apply -target clumio_wallet.test_wallet`.
+  Once the wallet resource is created, the rest of the resources can be created using `terraform apply`.
 
   {{ .Requirements }}
 

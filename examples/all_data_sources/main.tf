@@ -4,7 +4,6 @@ data aws_caller_identity current {
 data aws_region current {
 }
 
-
 resource "clumio_wallet" "test_wallet" {
   account_native_id = data.aws_caller_identity.current.account_id
 }
@@ -16,6 +15,13 @@ resource "clumio_wallet" "test_wallet" {
 module clumio_byok_module {
   providers = {
     clumio = clumio
+    aws.cc1 = aws.cc1
+    aws.ec1 = aws.ec1
+    aws.ew1 = aws.ew1
+    aws.ue1 = aws.ue1
+    aws.ue2 = aws.ue2
+    aws.uw1 = aws.uw1
+    aws.uw2 = aws.uw2
   }
   source = "../../"
   regions = setsubtract(clumio_wallet.test_wallet.supported_regions, toset([data.aws_region.current.name]))

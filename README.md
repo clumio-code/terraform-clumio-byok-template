@@ -9,6 +9,48 @@ This module is to be used along with the resource clumio_wallet as some of the i
 Below is an example of using the module:
 
 ```hcl
+provider clumio{
+  clumio_api_token = var.clumio_api_token
+  clumio_api_base_url = var.clumio_api_base_url
+}
+
+provider aws {}
+
+provider aws {
+  region = "us-east-1"
+  alias = "ue1"
+}
+
+provider aws {
+  region = "us-east-2"
+  alias = "ue2"
+}
+
+provider aws {
+  region = "us-west-1"
+  alias = "uw1"
+}
+
+provider aws {
+  region = "us-west-2"
+  alias = "uw2"
+}
+
+provider aws {
+  region = "ca-central-1"
+  alias = "cc1"
+}
+
+provider aws {
+  region = "eu-central-1"
+  alias = "ec1"
+}
+
+provider aws {
+  region = "eu-west-1"
+  alias = "ew1"
+}
+
 data aws_caller_identity current {
 }
 
@@ -27,6 +69,13 @@ resource "clumio_wallet" "test_wallet" {
 module clumio_byok_module {
   providers = {
     clumio = clumio
+    aws.cc1 = aws.cc1
+    aws.ec1 = aws.ec1
+    aws.ew1 = aws.ew1
+    aws.ue1 = aws.ue1
+    aws.ue2 = aws.ue2
+    aws.uw1 = aws.uw1
+    aws.uw2 = aws.uw2
   }
   source = "../../"
   regions = setsubtract(clumio_wallet.test_wallet.supported_regions, toset([data.aws_region.current.name]))
@@ -36,6 +85,8 @@ module clumio_byok_module {
   token = clumio_wallet.test_wallet.token
 }
 ```
+In the above example, since the regions in which the replica keys will be installed is based on the regions returned by the clumio_wallet resource, it has to be created first: `terraform apply -target clumio_wallet.test_wallet`.
+Once the wallet resource is created, the rest of the resources can be created using `terraform apply`.
 
 ## Requirements
 
@@ -73,7 +124,7 @@ No modules.
 | [aws_kms_replica_key.replica_ue2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_replica_key) | resource |
 | [aws_kms_replica_key.replica_uw1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_replica_key) | resource |
 | [aws_kms_replica_key.replica_uw2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_replica_key) | resource |
-| clumio_post_process_kms.clumio_phone_home | resource |
+| [clumio_post_process_kms.clumio_phone_home](https://registry.terraform.io/providers/clumio-code/clumio/latest/docs/resources/clumio_post_process_kms) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.byok_policy_document](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
