@@ -16,7 +16,7 @@ variable "token" {
 variable "role_name" {
   description = "The name to use for the role that Clumio will use to manage the key."
   type = string
-  default = ""
+  default = "ClumioKMSRole"
 }
 
 variable "external_id" {
