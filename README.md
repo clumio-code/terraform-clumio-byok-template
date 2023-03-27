@@ -47,14 +47,14 @@ The resources can be created using `terraform apply`.
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | ~>0.3.0 |
+| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.4.0, <0.6.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | ~>0.3.0 |
+| <a name="provider_clumio"></a> [clumio](#provider\_clumio) |  >=0.4.0, <0.6.0 |
 | <a name="provider_random"></a> [clumio](#provider\_random) | n/a |
 
 ## Modules
