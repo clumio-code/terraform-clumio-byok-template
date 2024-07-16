@@ -36,3 +36,15 @@ variable "deletion_window_in_days" {
   type = number
   default = 30
 }
+
+variable "key_tags" {
+  description = "Tags for mutli-region CMK to be created. Not used if existing_cmk_id is provided."
+  type = map(string)
+  default = {}
+}
+
+variable "key_alias_name" {
+  description = "Alias name for multi-region CMK to be used (optional)."
+  type = string
+  default = "clumio-byok"
+}

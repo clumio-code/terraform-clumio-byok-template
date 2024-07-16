@@ -79,6 +79,12 @@ resource "aws_kms_key" "multi_region_cmk_key" {
   enable_key_rotation      = true
   deletion_window_in_days  = var.deletion_window_in_days
   policy                   = data.aws_iam_policy_document.byok_policy_document.json
+  tags                     = var.key_tags
+}
+
+resource "aws_kms_alias" "key_alias" {
+  name = "alias/${var.key_alias_name}"
+  target_key_id = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
 }
 
 resource "aws_iam_role" "byok_mgmt_role" {
