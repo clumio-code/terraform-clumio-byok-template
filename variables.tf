@@ -44,7 +44,7 @@ variable "key_tags" {
 }
 
 variable "key_alias_name" {
-  description = "Alias name for multi-region CMK to be used (optional)."
+  description = "Alias name for multi-region CMK to be used (optional). Default value is clumio-byok."
   type = string
   default = "clumio-byok"
 }
