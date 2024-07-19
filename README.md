@@ -55,7 +55,7 @@ The resources can be created using `terraform apply`.
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
 | <a name="provider_clumio"></a> [clumio](#provider\_clumio) |  >=0.8.0, <0.10.0 |
-| <a name="provider_random"></a> [clumio](#provider\_random) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
 
@@ -66,6 +66,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [aws_kms_key.multi_region_cmk_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_key.aws_kms_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [clumio_post_process_kms.clumio_phone_home](https://registry.terraform.io/providers/clumio-code/clumio/latest/docs/resources/clumio_post_process_kms) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.byok_policy_document](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -82,9 +83,11 @@ No modules.
 | <a name="input_clumio_account_id"></a> [clumio\_account\_id](#input\_clumio\_account\_id) | Clumio account ID. | `string` | n/a | yes |
 | <a name="input_deletion_window_in_days"></a> [deletion\_window\_in\_days](#input\_deletion\_window\_in\_days) | Primary and replica key deletion window in days. | `number` | `30` | no |
 | <a name="input_token"></a> [token](#input\_token) | The AWS integration ID token. | `string` | n/a | yes |
-| <a name="input_role_name"></a> [token](#input\_role_name) | The name with which to create the AWS IAM role to manage the CMK. | `string` | ClumioKMSRole | no |
-| <a name="input_external_id"></a> [token](#input\_external_id) | The external ID to use when assuming the AWS IAM role. | `string` | random | no |
-| <a name="input_existing_cmk_id"></a> [token](#input\_existing_cmk_id) | The ID of an existing CMK to use as the BYOK encryption key. | `string` | n/a | no |
+| <a name="input_role_name"></a> [role_name](#input\_role_name) | The name with which to create the AWS IAM role to manage the CMK. | `string` | ClumioKMSRole | no |
+| <a name="input_external_id"></a> [external_id](#input\_external_id) | The external ID to use when assuming the AWS IAM role. | `string` | random | no |
+| <a name="input_existing_cmk_id"></a> [existing_cmk_id](#input\_existing_cmk_id) | The ID of an existing CMK to use as the BYOK encryption key. | `string` | n/a | no |
+| <a name="input_key_tags"></a> [key_tags](#input\_key_tags) | Tags for mutli-region CMK to be created. Not used if existing_cmk_id is provided. | `map(string)` | n/a | no |
+| <a name="input_key_alias_name"></a> [key_alias_name](#input\_key_alias_name) | Alias name for multi-region CMK to be used (optional). Default value is clumio-byok. | `string` | clumio-byok | no |
 
 ## Outputs
 
