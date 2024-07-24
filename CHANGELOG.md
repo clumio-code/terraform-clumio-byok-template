@@ -1,3 +1,6 @@
+## 0.3.0
+Changed the BYOK module to allow to set an Alias and tags for a CMK.
+
 ## 0.2.8
 Changed the Clumio provider version required to >=0.9.0, <0.11.0
 
