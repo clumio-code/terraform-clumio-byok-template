@@ -110,7 +110,8 @@ resource "clumio_post_process_kms" "clumio_phone_home" {
   role_external_id = var.external_id != "" ? var.external_id : random_uuid.external_id.id
   multi_region_cmk_key_id = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
   created_multi_region_cmk = var.existing_cmk_id == ""
-  template_version = 11
+  template_version = 13
+  clumio_iam_role_principal = "arn:aws:iam::${var.clumio_account_id}:role/ClumioCustomerProtectRole"
 }
 
 resource "time_sleep" "wait_30_seconds_for_iam_propagation" {
