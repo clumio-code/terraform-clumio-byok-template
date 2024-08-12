@@ -20,17 +20,12 @@ data "aws_iam_policy_document" "byok_policy_document" {
 
 data "aws_iam_policy_document" "role_policy_document" {
   statement {
+    sid = "ReplicationManagement"
     effect  = "Allow"
     actions = [
-      "kms:DescribeKey",
       "kms:PutKeyPolicy",
       "kms:ReplicateKey",
       "kms:TagResource",
-      "kms:CreateGrant",
-      "kms:RetireGrant",
-      "kms:RevokeGrant",
-      "kms:ListGrants",
-      "kms:ListRetirableGrants"
     ]
     resources = [
       join("", [
@@ -40,6 +35,25 @@ data "aws_iam_policy_document" "role_policy_document" {
     ]
   }
   statement {
+      sid = "GrantManagement"
+      effect  = "Allow"
+      actions = [
+        "kms:DescribeKey",
+        "kms:CreateGrant",
+        "kms:RetireGrant",
+        "kms:RevokeGrant",
+        "kms:ListGrants",
+        "kms:ListRetirableGrants"
+      ]
+      resources = [
+        join("", [
+            "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+            var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+        ])
+      ]
+    }
+  statement {
+    sid = "ReplicaKeyCreation"
     effect  = "Allow"
     actions = [
       "kms:CreateKey"
@@ -58,7 +72,7 @@ data "aws_iam_policy_document" "assume_role_policy_document" {
     sid     = "AllowClumioToAssumeRole"
     actions = ["sts:AssumeRole"]
     principals {
-      identifiers = ["arn:aws:iam::${var.clumio_account_id}:root"]
+      identifiers = ["arn:aws:iam::${var.clumio_account_id}:role/ClumioCustomerProtectRole"]
       type        = "AWS"
     }
     effect = "Allow"
