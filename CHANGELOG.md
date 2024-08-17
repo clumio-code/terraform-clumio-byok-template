@@ -1,3 +1,6 @@
+## 0.4.0
+Changed the BYOK module to pass additional parameters to post_process_kms resource.
+
 ## 0.3.0
 Changed the BYOK module to allow to set an Alias and tags for a CMK.
 
