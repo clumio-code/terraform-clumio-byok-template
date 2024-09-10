@@ -1,3 +1,6 @@
+## 0.3.1
+Changed the Clumio provider version required to >=0.10.0, <0.12.0
+
 ## 0.3.0
 Changes to allow to set an Alias and tags for a CMK.
 Changes to pass additional parameters to post_process_kms resource.
