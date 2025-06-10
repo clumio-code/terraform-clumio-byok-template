@@ -1,3 +1,6 @@
+## 0.3.4
+Changed the Clumio provider version required to >=0.13.0, <0.15.0
+
 ## 0.3.3
 Changed the Clumio provider version required to >=0.12.0, <0.14.0
 
