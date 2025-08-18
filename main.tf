@@ -118,7 +118,7 @@ resource "clumio_post_process_kms" "clumio_phone_home" {
   ]
   token = var.token
   account_id = var.account_native_id
-  region = data.aws_region.current.name
+  region = var.aws_region != "" ? var.aws_region : data.aws_region.current.name
   role_id = aws_iam_role.byok_mgmt_role.id
   role_arn = aws_iam_role.byok_mgmt_role.arn
   role_external_id = var.external_id != "" ? var.external_id : random_uuid.external_id.id

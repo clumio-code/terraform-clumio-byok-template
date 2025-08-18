@@ -24,6 +24,7 @@ data aws_region current {
 
 resource "clumio_wallet" "test_wallet" {
   account_native_id = data.aws_caller_identity.current.account_id
+  aws_region = data.aws_region.current.name
 }
 
 ################################################################################
@@ -38,6 +39,7 @@ module clumio_byok_module {
   source = "../../"
   account_native_id = clumio_wallet.test_wallet.account_native_id
   clumio_account_id = clumio_wallet.test_wallet.clumio_account_id
+  aws_region = clumio_wallet.test_wallet.aws_region
   token = clumio_wallet.test_wallet.token
 }
 ```
@@ -48,14 +50,14 @@ Once the wallet resource is created, the rest of the resources can be created us
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.13.0, <0.15.0 |
+| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.14.0, <0.16.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.13.0, <0.15.0 |
+| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.14.0, <0.16.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
@@ -84,6 +86,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_account_native_id"></a> [account\_native\_id](#input\_account\_native\_id) | Wallet account native ID. | `string` | n/a | yes |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The Wallet AWS region to deploy resources. | `string` | `""` | no |
 | <a name="input_clumio_account_id"></a> [clumio\_account\_id](#input\_clumio\_account\_id) | Clumio account ID. | `string` | n/a | yes |
 | <a name="input_deletion_window_in_days"></a> [deletion\_window\_in\_days](#input\_deletion\_window\_in\_days) | Primary and replica key deletion window in days. | `number` | `30` | no |
 | <a name="input_existing_cmk_id"></a> [existing\_cmk\_id](#input\_existing\_cmk\_id) | The ID of an existing multi-region CMK to use (optional). | `string` | `""` | no |
