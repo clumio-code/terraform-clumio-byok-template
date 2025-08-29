@@ -3,6 +3,12 @@ variable "account_native_id" {
   type = string
 }
 
+variable "aws_region" {
+  description = "The Wallet AWS region to deploy resources."
+  type = string
+  default = ""
+}
+
 variable "clumio_account_id" {
   description = "Clumio account ID."
   type = string
