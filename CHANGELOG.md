@@ -1,3 +1,6 @@
+## 0.4.1
+Changed the Clumio provider version required to >=0.15.0, <0.17.0
+
 ## 0.4.0
 Added aws_region parameter for BYOK region.
 Changed the Clumio provider version required to >=0.14.0, <0.16.0
