@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "role_policy_document" {
     ]
   }
   statement {
-    sid = "GrantManagement"
+    sid = "GrantCreation"
     effect  = "Allow"
     actions = [
       "kms:CreateGrant"
