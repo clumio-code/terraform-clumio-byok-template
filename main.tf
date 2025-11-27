@@ -23,7 +23,6 @@ data "aws_iam_policy_document" "role_policy_document" {
     sid = "ReplicationManagement"
     effect  = "Allow"
     actions = [
-      "kms:PutKeyPolicy",
       "kms:ReplicateKey",
       "kms:TagResource",
     ]
@@ -35,23 +34,47 @@ data "aws_iam_policy_document" "role_policy_document" {
     ]
   }
   statement {
-      sid = "GrantManagement"
-      effect  = "Allow"
-      actions = [
-        "kms:DescribeKey",
-        "kms:CreateGrant",
-        "kms:RetireGrant",
-        "kms:RevokeGrant",
-        "kms:ListGrants",
-        "kms:ListRetirableGrants"
-      ]
-      resources = [
-        join("", [
-            "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
-            var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
-        ])
+    sid = "GrantCreation"
+    effect  = "Allow"
+    actions = [
+      "kms:CreateGrant"
+    ]
+    resources = [
+      join("", [
+	"arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+	var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+      ])
+    ]
+    condition {
+      test     = "ForAllValues:StringLike"
+      variable = "kms:GrantOperations"
+      values   = [
+	"CreateGrant",
+	"Decrypt",
+	"DescribeKey",
+	"Encrypt",
+	"GenerateDataKey*",
+	"ReEncrypt*",
+	"RetireGrant"
       ]
     }
+  }
+  statement {
+    sid = "GrantManagement"
+    effect  = "Allow"
+    actions = [
+      "kms:DescribeKey",
+      "kms:RetireGrant",
+      "kms:ListGrants",
+      "kms:ListRetirableGrants"
+    ]
+    resources = [
+      join("", [
+	"arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+	var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+      ])
+    ]
+  }
   statement {
     sid = "ReplicaKeyCreation"
     effect  = "Allow"
@@ -59,6 +82,11 @@ data "aws_iam_policy_document" "role_policy_document" {
       "kms:CreateKey"
     ]
     resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:MultiRegionKeyType"
+      values   = ["REPLICA"]
+    }
   }
 }
 
@@ -118,13 +146,13 @@ resource "clumio_post_process_kms" "clumio_phone_home" {
   ]
   token = var.token
   account_id = var.account_native_id
-  region = var.aws_region != "" ? var.aws_region : data.aws_region.current.name
+  region = var.aws_region != "" ? var.aws_region : data.aws_region.current.region
   role_id = aws_iam_role.byok_mgmt_role.id
   role_arn = aws_iam_role.byok_mgmt_role.arn
   role_external_id = var.external_id != "" ? var.external_id : random_uuid.external_id.id
   multi_region_cmk_key_id = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
   created_multi_region_cmk = var.existing_cmk_id == ""
-  template_version = 13
+  template_version = 15
   clumio_iam_role_principal = "arn:aws:iam::${var.clumio_account_id}:role/ClumioCustomerProtectRole"
 }
 
