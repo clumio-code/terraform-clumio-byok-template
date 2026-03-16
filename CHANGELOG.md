@@ -1,3 +1,6 @@
+## 0.5.1
+* Changed the Clumio provider version required to >=0.17.0, <0.19.0
+
 ## 0.5.0
 * Update key management role permissions
   * Remove permissions for kms:PutKeyPolicy and kms:RevokeGrant. Add conditions to restrict the use of kms:CreateGrant and kms:CreateKey.
