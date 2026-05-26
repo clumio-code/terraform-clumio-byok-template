@@ -24,7 +24,7 @@ data aws_region current {
 
 resource "clumio_wallet" "test_wallet" {
   account_native_id = data.aws_caller_identity.current.account_id
-  aws_region = data.aws_region.current.name
+  aws_region = data.aws_region.current.region
 }
 
 ################################################################################
@@ -70,6 +70,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [aws_iam_role.byok_mgmt_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.byok_mgmt_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_kms_alias.key_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
 | [aws_kms_key.multi_region_cmk_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
 | [clumio_post_process_kms.clumio_phone_home](https://registry.terraform.io/providers/clumio-code/clumio/latest/docs/resources/post_process_kms) | resource |

@@ -133,10 +133,12 @@ resource "aws_iam_role" "byok_mgmt_role" {
   name = var.role_name
   path = "/"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_document.json
-  inline_policy {
-    name = "ReplicaAndGrantManagement"
-    policy = data.aws_iam_policy_document.role_policy_document.json
-  }
+}
+
+resource "aws_iam_role_policy" "byok_mgmt_role_policy" {
+  name   = "ReplicaAndGrantManagement"
+  role   = aws_iam_role.byok_mgmt_role.id
+  policy = data.aws_iam_policy_document.role_policy_document.json
 }
 
 resource "clumio_post_process_kms" "clumio_phone_home" {
@@ -159,6 +161,7 @@ resource "clumio_post_process_kms" "clumio_phone_home" {
 resource "time_sleep" "wait_30_seconds_for_iam_propagation" {
   depends_on = [
     aws_iam_role.byok_mgmt_role,
+    aws_iam_role_policy.byok_mgmt_role_policy,
   ]
   create_duration = "30s"
 }
