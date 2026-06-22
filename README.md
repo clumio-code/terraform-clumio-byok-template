@@ -51,14 +51,14 @@ Once the wallet resource is created, the rest of the resources can be created us
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0.0 |
-| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.19.0, <0.21.0 |
+| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.20.0, <0.22.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0.0 |
-| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.19.0, <0.21.0 |
+| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.20.0, <0.22.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
