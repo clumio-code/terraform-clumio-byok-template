@@ -1,3 +1,6 @@
+## 0.5.5
+* Changed the Clumio provider version required to >=0.20.0, <0.22.0.
+
 ## 0.5.4
 * Replaced deprecated arguments: `inline_policy` on `aws_iam_role` and `aws_region` data source `name` attribute. Requires AWS provider >= 6.0.0.
 
