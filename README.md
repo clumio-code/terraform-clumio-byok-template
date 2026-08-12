@@ -51,14 +51,14 @@ Once the wallet resource is created, the rest of the resources can be created us
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0.0 |
-| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.20.0, <0.22.0 |
+| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.22.0, <0.24.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0.0 |
-| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.20.0, <0.22.0 |
+| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.22.0, <0.24.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
@@ -94,7 +94,7 @@ No modules.
 | <a name="input_existing_cmk_id"></a> [existing\_cmk\_id](#input\_existing\_cmk\_id) | The ID of an existing multi-region CMK to use (optional). | `string` | `""` | no |
 | <a name="input_external_id"></a> [external\_id](#input\_external\_id) | The external ID to use when assuming the role. | `string` | `""` | no |
 | <a name="input_key_alias_name"></a> [key\_alias\_name](#input\_key\_alias\_name) | Alias name for multi-region CMK to be used (optional). Default value is clumio-byok. | `string` | `"clumio-byok"` | no |
-| <a name="input_key_tags"></a> [key\_tags](#input\_key\_tags) | Tags for mutli-region CMK to be created. Not used if existing\_cmk\_id is provided. | `map(string)` | `{}` | no |
+| <a name="input_key_tags"></a> [key\_tags](#input\_key\_tags) | Tags for multi-region CMK to be created. Not used if existing\_cmk\_id is provided. | `map(string)` | `{}` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | The name to use for the role that Clumio will use to manage the key. | `string` | `"ClumioKMSRole"` | no |
 | <a name="input_token"></a> [token](#input\_token) | The AWS integration ID token. | `string` | n/a | yes |
 
