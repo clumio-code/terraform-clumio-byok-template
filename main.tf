@@ -1,15 +1,15 @@
-data aws_caller_identity current {
+data "aws_caller_identity" "current" {
   provider = aws
 }
 
-data aws_region current {
+data "aws_region" "current" {
   provider = aws
 }
 
 data "aws_iam_policy_document" "byok_policy_document" {
   statement {
     effect  = "Allow"
-    actions = [ "kms:*" ]
+    actions = ["kms:*"]
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
@@ -20,48 +20,48 @@ data "aws_iam_policy_document" "byok_policy_document" {
 
 data "aws_iam_policy_document" "role_policy_document" {
   statement {
-    sid = "ReplicationManagement"
-    effect  = "Allow"
+    sid    = "ReplicationManagement"
+    effect = "Allow"
     actions = [
       "kms:ReplicateKey",
       "kms:TagResource",
     ]
     resources = [
       join("", [
-          "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
-          var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+        "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+        var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
       ])
     ]
   }
   statement {
-    sid = "GrantCreation"
-    effect  = "Allow"
+    sid    = "GrantCreation"
+    effect = "Allow"
     actions = [
       "kms:CreateGrant"
     ]
     resources = [
       join("", [
-	"arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
-	var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+        "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+        var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
       ])
     ]
     condition {
       test     = "ForAllValues:StringLike"
       variable = "kms:GrantOperations"
-      values   = [
-	"CreateGrant",
-	"Decrypt",
-	"DescribeKey",
-	"Encrypt",
-	"GenerateDataKey*",
-	"ReEncrypt*",
-	"RetireGrant"
+      values = [
+        "CreateGrant",
+        "Decrypt",
+        "DescribeKey",
+        "Encrypt",
+        "GenerateDataKey*",
+        "ReEncrypt*",
+        "RetireGrant"
       ]
     }
   }
   statement {
-    sid = "GrantManagement"
-    effect  = "Allow"
+    sid    = "GrantManagement"
+    effect = "Allow"
     actions = [
       "kms:DescribeKey",
       "kms:RetireGrant",
@@ -70,14 +70,14 @@ data "aws_iam_policy_document" "role_policy_document" {
     ]
     resources = [
       join("", [
-	"arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
-	var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+        "arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/",
+        var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
       ])
     ]
   }
   statement {
-    sid = "ReplicaKeyCreation"
-    effect  = "Allow"
+    sid    = "ReplicaKeyCreation"
+    effect = "Allow"
     actions = [
       "kms:CreateKey"
     ]
@@ -113,25 +113,25 @@ data "aws_iam_policy_document" "assume_role_policy_document" {
 }
 
 resource "aws_kms_key" "multi_region_cmk_key" {
-  count                    = var.existing_cmk_id != "" ? 0 : 1
-  multi_region             = true
-  description              = "The CMK for Clumio to use to encrypt backups"
-  key_usage                = "ENCRYPT_DECRYPT"
-  is_enabled               = true
-  enable_key_rotation      = true
-  deletion_window_in_days  = var.deletion_window_in_days
-  policy                   = data.aws_iam_policy_document.byok_policy_document.json
-  tags                     = var.key_tags
+  count                   = var.existing_cmk_id != "" ? 0 : 1
+  multi_region            = true
+  description             = "The CMK for Clumio to use to encrypt backups"
+  key_usage               = "ENCRYPT_DECRYPT"
+  is_enabled              = true
+  enable_key_rotation     = true
+  deletion_window_in_days = var.deletion_window_in_days
+  policy                  = data.aws_iam_policy_document.byok_policy_document.json
+  tags                    = var.key_tags
 }
 
 resource "aws_kms_alias" "key_alias" {
-  name = "alias/${var.key_alias_name}"
+  name          = "alias/${var.key_alias_name}"
   target_key_id = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
 }
 
 resource "aws_iam_role" "byok_mgmt_role" {
-  name = var.role_name
-  path = "/"
+  name               = var.role_name
+  path               = "/"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_document.json
 }
 
@@ -146,15 +146,15 @@ resource "clumio_post_process_kms" "clumio_phone_home" {
     aws_kms_key.multi_region_cmk_key,
     time_sleep.wait_30_seconds_for_iam_propagation,
   ]
-  token = var.token
-  account_id = var.account_native_id
-  region = var.aws_region != "" ? var.aws_region : data.aws_region.current.region
-  role_id = aws_iam_role.byok_mgmt_role.id
-  role_arn = aws_iam_role.byok_mgmt_role.arn
-  role_external_id = var.external_id != "" ? var.external_id : random_uuid.external_id.id
-  multi_region_cmk_key_id = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
-  created_multi_region_cmk = var.existing_cmk_id == ""
-  template_version = 15
+  token                     = var.token
+  account_id                = var.account_native_id
+  region                    = var.aws_region != "" ? var.aws_region : data.aws_region.current.region
+  role_id                   = aws_iam_role.byok_mgmt_role.id
+  role_arn                  = aws_iam_role.byok_mgmt_role.arn
+  role_external_id          = var.external_id != "" ? var.external_id : random_uuid.external_id.id
+  multi_region_cmk_key_id   = var.existing_cmk_id != "" ? var.existing_cmk_id : aws_kms_key.multi_region_cmk_key[0].id
+  created_multi_region_cmk  = var.existing_cmk_id == ""
+  template_version          = 15
   clumio_iam_role_principal = "arn:aws:iam::${var.clumio_account_id}:role/ClumioCustomerProtectRole"
 }
 

@@ -1,3 +1,7 @@
+## 0.5.7
+* Added input validation for the module variables.
+* Changed the Clumio provider version required to >=0.22.0, <0.25.0.
+
 ## 0.5.6
 * Changed the Clumio provider version required to >=0.21.0, <0.23.0.
 
