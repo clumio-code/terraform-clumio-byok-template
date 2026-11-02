@@ -9,38 +9,38 @@ This module is to be used along with the resource clumio_wallet as some of the i
 Below is an example of using the module:
 
 ```hcl
-provider clumio{
-  clumio_api_token = var.clumio_api_token
+provider "clumio" {
+  clumio_api_token    = var.clumio_api_token
   clumio_api_base_url = var.clumio_api_base_url
 }
 
-provider aws {}
+provider "aws" {}
 
-data aws_caller_identity current {
+data "aws_caller_identity" "current" {
 }
 
-data aws_region current {
+data "aws_region" "current" {
 }
 
 resource "clumio_wallet" "test_wallet" {
   account_native_id = data.aws_caller_identity.current.account_id
-  aws_region = data.aws_region.current.region
+  aws_region        = data.aws_region.current.region
 }
 
 ################################################################################
 # Clumio BYOK Module
 ################################################################################
 
-module clumio_byok_module {
+module "clumio_byok_module" {
   providers = {
     clumio = clumio
-    aws = aws
+    aws    = aws
   }
-  source = "../../"
+  source            = "../../"
   account_native_id = clumio_wallet.test_wallet.account_native_id
   clumio_account_id = clumio_wallet.test_wallet.clumio_account_id
-  aws_region = clumio_wallet.test_wallet.aws_region
-  token = clumio_wallet.test_wallet.token
+  aws_region        = clumio_wallet.test_wallet.aws_region
+  token             = clumio_wallet.test_wallet.token
 }
 ```
 In the above example, since the regions in which the replica keys will be installed is based on the regions returned by the clumio_wallet resource, it has to be created first: `terraform apply -target clumio_wallet.test_wallet`.
@@ -51,14 +51,14 @@ Once the wallet resource is created, the rest of the resources can be created us
 | Name | Version |
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0.0 |
-| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.22.0, <0.25.0 |
+| <a name="requirement_clumio"></a> [clumio](#requirement\_clumio) | >=0.22.0, <0.26.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0.0 |
-| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.22.0, <0.25.0 |
+| <a name="provider_clumio"></a> [clumio](#provider\_clumio) | >=0.22.0, <0.26.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
